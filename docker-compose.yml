@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  tech_task_backend:
+    container_name: tech_task
+    image: tech_task:1.0.5
+    build:
+      context: .
+    ports:
+      - "3001:3001"
+    environment:
+      - EXTERNAL_PORT=3001
+      - PGDATABASE=tech_task_db
+      - PGUSER=wukass
+      - PGPASSWORD=12345
+      - PGHOST=tech_task_node_db
+    depends_on:
+      - tech_task_node_db
+  tech_task_node_db:
+    container_name: tech_task_node_db
+    image: "postgres:12"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=wukass
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=tech_task_db
+    volumes:
+      - nps_data:/var/lib/postgresql/data
+
+volumes:
+  nps_data: {}
