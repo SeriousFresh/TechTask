@@ -1,0 +1,9 @@
+- install docker
+
+- run this commands in TechTask folder:
+docker-compose build
+docker-compose up
+
+- server should be running on port 3001
+
+- check quick-doc.txt
