@@ -1,0 +1,2 @@
+airbnb style used because it's most strict and 
+most suitable for backend node.js programming
