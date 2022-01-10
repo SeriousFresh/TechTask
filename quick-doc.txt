@@ -1,0 +1,82 @@
+FARM UNITY TYPES ROUTES:
+
+Get all farm unity types:
+GET /farm/unity-types/
+
+Get farm unity type by id:
+GET /farm/unity-types/:id
+
+Create farm unity type:
+POST /farm/unity-types/
+body args:
+ - name: STRING
+
+Update farm unity type:
+PUT /farm/unity-types/:id
+body args:
+  - name: STRING
+
+Delete farm unity type:
+DELETE /farm/unity-types/:id
+
+-------------------------------
+
+FARM UNITS ROUTES:
+
+Get all farm units:
+GET /farm/units/
+
+Get farm unit by id:
+GET /farm/units/:id
+
+Create farm unit:
+POST /farm/units/
+body args:
+ - farmUnitName: STRING
+ - farmUnityTypeId: UUID4
+
+Update farm unit:
+PUT /farm/units/:id
+body args:
+  - farmUnitName: STRING
+  - farmUnityTypeId: UUID4
+
+Delete farm unit:
+DELETE /farm/units/:id
+
+Feed farm unit:
+PUT /farm/units/:id
+
+------------------------------------------
+
+FARM BUILDING ROUTES:
+
+Get all farm buildings:
+GET /farm/buildings/
+
+Get farm building by id:
+GET /farm/buildings/:id
+
+Create farm building:
+POST /farm/buildings/
+body args:
+ - farmBuildingName: STRING
+ - farmUnitName: STRING
+ - farmUnityTypeId: UUID4
+
+Update farm building:
+PUT /farm/buildings/:id
+body args:
+ - farmBuildingName: STRING
+ - farmUnityTypeId: UUID4
+
+Delete farm building:
+DELETE /farm/buildings/:id
+
+Add existing farm unit to farm building:
+POST /farm/buildings/add-unit/:id
+body args:
+ - farmUnitId: UUID4
+
+Get farm building units by id:
+GET /farm/buildings/get-units/:id
