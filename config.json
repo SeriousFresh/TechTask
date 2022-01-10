@@ -1,0 +1,7 @@
+{
+  "maxHealth" : 100,
+  "minHealth" : 50,
+  "feedLimitSeconds": 5,
+  "countdownBuilding": 60,
+  "countdownUnit": 10
+}

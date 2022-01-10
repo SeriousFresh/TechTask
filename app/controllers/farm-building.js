@@ -1,4 +1,6 @@
+const { Op } = require('sequelize');
 const db = require('../models/db');
+const config = require('../../config.json');
 
 const {
   FarmBuilding,
@@ -28,7 +30,6 @@ exports.getAll = async (req, res) => {
     farmBuildings = farmBuildings.map((farmBuilding) => mapFarmBuilding(farmBuilding));
     return res.status(200).json(farmBuildings);
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: 'Error while getting all farm buildings!', error });
   }
 };
@@ -114,7 +115,12 @@ exports.addFarmUnit = async (req, res) => {
     const farmUnit = await FarmUnit.findByPk(farmUnitId);
     if (!farmUnit) return res.status(404).json({ message: 'Farm unit by this ID does not exist!' });
     if (farmBuilding.FarmUnityTypeId !== farmUnit.FarmUnityTypeId) return res.status(403).json({ message: 'Farm building and farm unit are not from same unity type!' });
-    await farmUnit.update({ FarmBuildingId: farmBuildingId });
+    await farmUnit.update({
+      FarmBuildingId: farmBuildingId,
+      feedingCountdown: config.countdownUnit,
+      currentLostHealth: 0,
+      previousLostHealth: 0,
+    });
     return res.status(200).json({ message: 'Farm unit successfully added to the farm building!' });
   } catch (error) {
     return res.status(500).json({ message: 'Error while adding farm unit to farm building!', error });
@@ -128,10 +134,40 @@ exports.getAllFarmUnits = async (req, res) => {
     if (!farmBuilding) return res.status(404).json({ message: 'Farm building for this ID does not exist!' });
     const farmUnits = await FarmUnit.findAll({
       where: { FarmBuildingId: farmBuildingId },
-      attributes: ['id', 'health', 'isDead', 'FarmBuildingId'],
+      attributes: ['id', 'health', 'isDead', 'FarmBuildingId', 'feedingCountdown', 'currentLostHealth', 'previousLostHealth'],
     });
     return res.status(200).json(farmUnits);
   } catch (error) {
     return res.status(500).json({ message: 'Error while getting farm units!', error });
+  }
+};
+
+exports.countDown = async () => {
+  try {
+    const farmBuildings = await FarmBuilding.findAll({
+      attributes: ['id', 'feedingCountdown'],
+    });
+    const promises = [];
+    const buildingIdsForResetFarmUnitLostHealth = [];
+    for (const farmBuilding of farmBuildings) {
+      promises.push(farmBuilding.update({ feedingCountdown: farmBuilding.feedingCountdown - 1 }));
+      if (farmBuilding.feedingCountdown - 1 === config.countdownBuilding - 1) {
+        buildingIdsForResetFarmUnitLostHealth.push(farmBuilding.id);
+      }
+    }
+    const farmUnits = await FarmUnit.findAll({
+      where: {
+        FarmBuildingId: { [Op.in]: buildingIdsForResetFarmUnitLostHealth },
+      },
+    });
+    for (const farmUnit of farmUnits) {
+      promises.push(farmUnit.update({
+        currentLostHealth: 0,
+        previousLostHealth: farmUnit.currentLostHealth,
+      }));
+    }
+    return Promise.all(promises);
+  } catch (error) {
+    return Promise.resolve();
   }
 };

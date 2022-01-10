@@ -1,3 +1,5 @@
+const config = require('../../config.json');
+
 module.exports = (sequelize, Datatypes) => {
   const FarmBuilding = sequelize.define('FarmBuilding', {
     id: {
@@ -14,18 +16,19 @@ module.exports = (sequelize, Datatypes) => {
         notEmpty: true,
       },
     },
-    health: {
+    feedingCountdown: {
       type: Datatypes.INTEGER,
-      defaultValue: Math.floor(Math.random() * (100 - 50 + 1) + 50),
-      // not sure if defaultValue like this will work in production
+      defaultValue: config.countdownBuilding,
       allowNull: false,
-    },
-    isDead: {
-      type: Datatypes.BOOLEAN,
-      defaultValue: false,
       get() {
-        const health = this.getDataValue('health');
-        return health <= 0;
+        return this.getDataValue('feedingCountdown');
+      },
+      set(newCountDown) {
+        if (newCountDown === 0) {
+          this.setDataValue('feedingCountdown', config.countdownBuilding);
+        } else {
+          this.setDataValue('feedingCountdown', newCountDown);
+        }
       },
     },
   });

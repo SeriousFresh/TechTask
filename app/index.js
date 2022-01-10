@@ -1,5 +1,7 @@
 const express = require('express');
 const db = require('./models/db');
+const controllerFarmUnit = require('./controllers/farm-unit');
+const controllerFarmBuilding = require('./controllers/farm-building');
 
 const app = express();
 
@@ -19,6 +21,11 @@ db.sequelize
     const port = process.env.EXTERNAL_PORT || 3001;
     app.listen(port, () => {
       console.log(`running on server port ${port}`);
+      function intervalFunc() {
+        controllerFarmBuilding.countDown();
+        controllerFarmUnit.countDown();
+      }
+      setInterval(intervalFunc, 1000);
     });
   })
   .catch((error) => console.log(error));

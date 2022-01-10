@@ -1,5 +1,7 @@
+const { Op } = require('sequelize');
 const moment = require('moment');
 const db = require('../models/db');
+const config = require('../../config.json');
 
 const {
   FarmBuilding,
@@ -45,7 +47,6 @@ exports.createOne = async (req, res) => {
     const farmUnit = await FarmUnit.create(newFarmUnitData);
     return res.status(201).json(farmUnit);
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: 'Error while creating farm unit!', error });
   }
 };
@@ -78,20 +79,46 @@ exports.deleteOne = async (req, res) => {
 
 exports.feed = async (req, res) => {
   try {
-    const dateNow = moment(new Date());
+    const dateNow = new Date();
+    const momentNow = moment(dateNow);
     const farmUnit = await FarmUnit.findByPk(req.params.id);
     if (!farmUnit) return res.status(404).json({ message: 'Farm unit for this id does not exist!' });
-    const timeDifference = dateNow.diff(moment(farmUnit.updatedAt), 'seconds');
-    console.log(new Date(), farmUnit.updatedAt);
-    console.log(dateNow, moment(farmUnit.updatedAt));
-    console.log(timeDifference);
-    if (timeDifference < 5) return res.status(403).json({ message: 'Farm units can not be fed more than once every 5 seconds!' });
-    const newHealth = farmUnit.health === 100 ? 100 : farmUnit.health + 1;
-    await farmUnit.update({ health: newHealth, isDead: false });
-    return res.status(200).json({
-      message: 'Farm unit successfully fed!',
-    });
+    const timeDifference = momentNow.diff(moment(farmUnit.lastTimeFed), 'seconds');
+    if (farmUnit.lastTimeFed == null || timeDifference >= config.feedLimitSeconds) {
+      const healthToAdd = farmUnit.previousLostHealth !== 0
+        ? (1 + farmUnit.previousLostHealth / 2) : 1;
+      const newHealth = farmUnit.health + healthToAdd > config.maxHealth
+        ? config.maxHealth : farmUnit.health + healthToAdd;
+      await farmUnit.update({
+        health: newHealth,
+        isDead: false,
+        feedingCountdown: config.countdownUnit,
+        lastTimeFed: dateNow,
+      });
+      return res.status(200).json({
+        message: 'Farm unit successfully fed!',
+      });
+    }
+    return res.status(403).json({ message: 'Farm units can not be fed more than once every 5 seconds!' });
   } catch (error) {
     return res.status(500).json(error);
+  }
+};
+
+exports.countDown = async () => {
+  try {
+    const farmUnits = await FarmUnit.findAll({
+      where: {
+        FarmBuildingId: { [Op.not]: null },
+        isDead: false,
+      },
+    });
+    const promises = [];
+    for (const farmUnit of farmUnits) {
+      promises.push(farmUnit.update({ feedingCountdown: farmUnit.feedingCountdown - 1 }));
+    }
+    return Promise.all(promises);
+  } catch (error) {
+    return Promise.resolve();
   }
 };
