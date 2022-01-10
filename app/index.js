@@ -1,31 +1,24 @@
 const express = require('express');
-
-const sequelize = require('./util/database');
-// const User = require('./models/user');
+const db = require('./models/db');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/dev', require('./routes/dev'));
-app.use('/users', require('./routes/users'));
+app.use('/farm/buildings', require('./routes/farm-building'));
+app.use('/farm/units', require('./routes/farm-unit'));
+app.use('/farm/unity-types', require('./routes/farm-unity-type'));
 
-(async () => {
-  try {
-    await sequelize.sync({
-      force: false,
+db.sequelize
+  .sync({
+    // force: true
+    alter: true,
+  })
+  .then(() => {
+    const port = process.env.EXTERNAL_PORT || 3001;
+    app.listen(port, () => {
+      console.log(`running on server port ${port}`);
     });
-    console.log('test');
-  } catch (error) {
-    console.log(error);
-  }
-})();
-
-try {
-  app.listen(process.env.EXTERNAL_PORT || 3001, () => {
-    console.log(`running on server port ${process.env.PORT || 3001}`);
-  });
-} catch (error) {
-  console.error(error);
-}
+  })
+  .catch((error) => console.log(error));
