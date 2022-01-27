@@ -9,6 +9,8 @@ const {
   FarmUnityType,
 } = db;
 
+const { STANDARD_FEEDING_ADDITION, PERCENTAGE_OF_LOST_HEALTH_TO_ADD } = config;
+
 exports.getAll = async (req, res) => {
   try {
     const farmUnits = await FarmUnit.findAll({
@@ -85,8 +87,10 @@ exports.feed = async (req, res) => {
     if (!farmUnit) return res.status(404).json({ message: 'Farm unit for this id does not exist!' });
     const timeDifference = momentNow.diff(moment(farmUnit.lastTimeFed), 'seconds');
     if (farmUnit.lastTimeFed == null || timeDifference >= config.feedLimitSeconds) {
-      const healthToAdd = farmUnit.previousLostHealth !== 0
-        ? (1 + farmUnit.previousLostHealth / 2) : 1;
+      let healthToAdd = STANDARD_FEEDING_ADDITION;
+      if (farmUnit.previousLostHealth !== 0) {
+        healthToAdd += farmUnit.previousLostHealth * PERCENTAGE_OF_LOST_HEALTH_TO_ADD;
+      }
       const newHealth = farmUnit.health + healthToAdd > config.maxHealth
         ? config.maxHealth : farmUnit.health + healthToAdd;
       await farmUnit.update({
