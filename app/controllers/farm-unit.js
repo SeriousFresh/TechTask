@@ -1,8 +1,9 @@
-const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 const moment = require('moment');
 const db = require('../models/db');
 const config = require('../../config.json');
 
+const { Op } = sequelize;
 const {
   FarmBuilding,
   FarmUnit,
@@ -80,10 +81,16 @@ exports.deleteOne = async (req, res) => {
 };
 
 exports.feed = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
+    const { id } = req.params;
     const dateNow = new Date();
     const momentNow = moment(dateNow);
-    const farmUnit = await FarmUnit.findByPk(req.params.id);
+    const farmUnit = await FarmUnit.findOne({
+      where: { id },
+      lock: true,
+      transaction,
+    });
     if (!farmUnit) return res.status(404).json({ message: 'Farm unit for this id does not exist!' });
     const timeDifference = momentNow.diff(moment(farmUnit.lastTimeFed), 'seconds');
     if (farmUnit.lastTimeFed == null || timeDifference >= config.feedLimitSeconds) {
@@ -98,31 +105,43 @@ exports.feed = async (req, res) => {
         isDead: false,
         feedingCountdown: config.countdownUnit,
         lastTimeFed: dateNow,
-      });
+      }, { transaction });
+      await transaction.commit();
       return res.status(200).json({
         message: 'Farm unit successfully fed!',
       });
     }
+    await transaction.commit();
     return res.status(403).json({ message: 'Farm units can not be fed more than once every 5 seconds!' });
   } catch (error) {
+    await transaction.rollback();
+    console.log(error);
     return res.status(500).json(error);
   }
 };
 
 exports.countDown = async () => {
   try {
-    const farmUnits = await FarmUnit.findAll({
-      where: {
-        FarmBuildingId: { [Op.not]: null },
-        isDead: false,
-      },
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const farmUnits = await FarmUnit.findAll({
+        where: {
+          FarmBuildingId: { [Op.not]: null },
+          isDead: false,
+        },
+        transaction,
+        lock: true,
+      });
+      const promises = [];
+      for (const farmUnit of farmUnits) {
+        promises.push(farmUnit.update(
+          { feedingCountdown: farmUnit.feedingCountdown - 1 },
+          { transaction },
+        ));
+      }
+      return Promise.all(promises);
     });
-    const promises = [];
-    for (const farmUnit of farmUnits) {
-      promises.push(farmUnit.update({ feedingCountdown: farmUnit.feedingCountdown - 1 }));
-    }
-    return Promise.all(promises);
+    return result;
   } catch (error) {
-    return Promise.resolve();
+    return Promise.reject();
   }
 };

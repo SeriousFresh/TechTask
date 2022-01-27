@@ -8,6 +8,9 @@ const {
   FarmUnityType,
 } = db;
 
+// eslint-disable-next-line no-promise-executor-return
+// const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
+
 const mapFarmBuilding = (farmBuilding) => {
   const obj = {
     id: farmBuilding.id,
@@ -100,7 +103,7 @@ exports.deleteOne = async (req, res) => {
     promises.push(FarmUnit.destroy({ where: { FarmBuildingId: farmBuildingId } }));
     promises.push(FarmBuilding.destroy({ where: { id: farmBuildingId } }));
     await Promise.all(promises);
-    return res.status(200).json("Building and it's units successfully deleted!");
+    return res.status(200).json({ message: "Building and it's units successfully deleted!" });
   } catch (error) {
     return res.status(500).json({ message: "Error while deleting farm building and it's units!", error });
   }
