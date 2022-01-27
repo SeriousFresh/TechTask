@@ -3,5 +3,7 @@
   "minHealth" : 50,
   "feedLimitSeconds": 5,
   "countdownBuilding": 60,
-  "countdownUnit": 10
+  "countdownUnit": 10,
+  "STANDARD_FEEDING_ADDITION": 1,
+  "PERCENTAGE_OF_LOST_HEALTH_TO_ADD": 0.5
 }
