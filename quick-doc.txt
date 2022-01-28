@@ -53,6 +53,9 @@ FARM BUILDING ROUTES:
 
 Get all farm buildings:
 GET /farm/buildings/
+query args:
+ - rowsPerPage: int (default 5)
+ - pageNumber: int (default 1)
 
 Get farm building by id:
 GET /farm/buildings/:id
@@ -80,3 +83,6 @@ body args:
 
 Get farm building units by id:
 GET /farm/buildings/get-units/:id
+query args:
+ - rowsPerPage: int (default 3)
+ - pageNumber: int (default 1)

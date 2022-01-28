@@ -23,12 +23,19 @@ const mapFarmBuilding = (farmBuilding) => {
 
 exports.getAll = async (req, res) => {
   try {
+    const limit = req.query.rowsPerPage || 5;
+    const offset = ((req.query.pageNumber || 1) - 1) * limit;
+    const orderField = req.query.orderField || 'createdAt';
+    const sortType = req.query.sortType || 'asc';
     let farmBuildings = await FarmBuilding.findAll({
       include: [
         { model: FarmUnit, as: 'farmUnits' },
         { model: FarmUnityType },
       ],
       attributes: ['id', 'name', 'FarmUnityTypeId'], // ,[sequelize.fn('COUNT', sequelize.col('FarmUnit.id')), 'numberOfFarmUnits']],
+      limit,
+      offset,
+      order: [[orderField, sortType]],
     });
     farmBuildings = farmBuildings.map((farmBuilding) => mapFarmBuilding(farmBuilding));
     return res.status(200).json(farmBuildings);
@@ -87,8 +94,8 @@ exports.updateOne = async (req, res) => {
     const farmUnityType = await FarmUnityType.findByPk(farmUnityTypeId);
     if (!farmUnityType) return res.status(404).json({ message: 'Farm unity type for this ID does not exist!' });
     const newFarmBuildingData = { name: farmBuildingName, FarmUnityTypeId: farmUnityTypeId };
-    await FarmBuilding.update(newFarmBuildingData, { where: { id: req.params.id } });
-    return res.status(200).json({ message: 'Farm building successfully updated!' });
+    await farmBuilding.update(newFarmBuildingData);
+    return res.status(200).json(farmBuilding);
   } catch (error) {
     return res.status(500).json({ message: 'Error while updating farm building!', error });
   }
@@ -111,8 +118,7 @@ exports.deleteOne = async (req, res) => {
 
 exports.addFarmUnit = async (req, res) => {
   try {
-    const { farmUnitId } = req.body;
-    const farmBuildingId = req.params.id;
+    const { farmBuildingId, farmUnitId } = req.params;
     const farmBuilding = await FarmBuilding.findByPk(farmBuildingId);
     if (!farmBuilding) return res.status(404).json({ message: 'Farm building by this ID does not exist!' });
     const farmUnit = await FarmUnit.findByPk(farmUnitId);
@@ -133,11 +139,17 @@ exports.addFarmUnit = async (req, res) => {
 exports.getAllFarmUnits = async (req, res) => {
   try {
     const farmBuildingId = req.params.id;
+    const limit = req.query.rowsPerPage || 3;
+    const offset = ((req.query.pageNumber || 1) - 1) * limit;
+    const orderField = req.query.orderField || 'createdAt';
+    const sortType = req.query.sortType || 'asc';
     const farmBuilding = await FarmBuilding.findByPk(farmBuildingId);
     if (!farmBuilding) return res.status(404).json({ message: 'Farm building for this ID does not exist!' });
     const farmUnits = await FarmUnit.findAll({
       where: { FarmBuildingId: farmBuildingId },
-      attributes: ['id', 'health', 'isDead', 'FarmBuildingId', 'feedingCountdown', 'currentLostHealth', 'previousLostHealth'],
+      limit,
+      offset,
+      order: [[orderField, sortType]],
     });
     return res.status(200).json(farmUnits);
   } catch (error) {

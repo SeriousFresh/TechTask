@@ -1,12 +1,12 @@
 const router = require('express').Router();
 const controller = require('../controllers/farm-unity-type');
-const validator = require('../validators/validateUUID4');
+const validateParams = require('../validators/validateUUID4Params');
 
 router
   .get('/', controller.getAll)
-  .get('/:id', validator(), controller.getOne)
+  .get('/:id', validateParams('id'), controller.getOne)
   .post('/', controller.createOne)
-  .put('/:id', validator(), controller.updateOne)
-  .delete('/:id', validator(), controller.deleteOne);
+  .put('/:id', validateParams('id'), controller.updateOne)
+  .delete('/:id', validateParams('id'), controller.deleteOne);
 
 module.exports = router;

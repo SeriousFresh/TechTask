@@ -33,7 +33,7 @@ exports.updateOne = async (req, res) => {
   try {
     if (!farmUnityType) return res.status(404).json({ message: 'Farm unity type by this id not found!' });
     await farmUnityType.update({ name });
-    return res.status(200).json({ message: 'Farm unity type successfully updated!' });
+    return res.status(200).json(farmUnityType);
   } catch (error) {
     return res.status(500).json({ message: 'Error while updating farm unity type!', error });
   }
