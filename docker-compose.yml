@@ -9,11 +9,11 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - EXTERNAL_PORT=3001
-      - PGDATABASE=tech_task_db
-      - PGUSER=wukass
-      - PGPASSWORD=12345
-      - PGHOST=tech_task_node_db
+      - EXTERNAL_PORT
+      - PGDATABASE
+      - PGUSER
+      - PGPASSWORD
+      - PGHOST
     depends_on:
       - tech_task_node_db
   tech_task_node_db:
@@ -22,9 +22,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=wukass
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_DB=tech_task_db
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
     volumes:
       - nps_data:/var/lib/postgresql/data
 

@@ -20,7 +20,7 @@ db.sequelize
     alter: true,
   })
   .then(() => {
-    const PORT = process.env.EXTERNAL_PORT || 3001;
+    const PORT = process.env.EXTERNAL_PORT;
     app.listen(PORT, () => {
       console.log(`running on server port ${PORT}`);
       const intervalFunc = () => {

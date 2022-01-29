@@ -7,11 +7,11 @@ const basename = path.basename(__filename);
 const db = {};
 
 const sequelize = new Sequelize(
-  process.env.PGDATABASE || 'tech_task_db',
-  process.env.PGUSER || 'wukass',
-  process.env.PGPASSWORD || '12345',
+  process.env.PGDATABASE,
+  process.env.PGUSER,
+  process.env.PGPASSWORD,
   {
-    host: process.env.PGHOST || 'tech_task_node_db',
+    host: process.env.PGHOST,
     dialect: 'postgres',
   },
 );
