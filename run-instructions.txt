@@ -4,6 +4,8 @@
 docker-compose build
 - start db:
 docker-compose up -d tech_task_node_db
+- only if db doesn't exists run:(change variables in ${})
+npx sequelize-cli db:create --url 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}' --debug
 - run migrations:(change variables in ${})
 npx sequelize-cli db:migrate --url 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}' --debug
 - start the app
