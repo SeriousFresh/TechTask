@@ -9,7 +9,7 @@ router
   .post('/', validateBody('farmUnityTypeId'), controller.createOne)
   .put('/:id', validateParams('id'), validateBody('farmUnityTypeId'), controller.updateOne)
   .delete('/:id', validateParams('id'), controller.deleteOne)
-  .post('/:farmBuildingId/units/:farmUnitId', validateParams('farmBuildingId', 'farmUnitId'), validateBody('farmUnitId'), controller.addFarmUnit)
+  .post('/:farmBuildingId/units/:farmUnitId', validateParams('farmBuildingId', 'farmUnitId'), controller.addFarmUnit)
   .get('/:id/units/', validateParams('id'), controller.getAllFarmUnits);
 
 module.exports = router;
