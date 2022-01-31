@@ -1,9 +1,15 @@
 - install docker
 
-- run this commands in TechTask folder:
+- run next commands in TechTask folder:
 docker-compose build
-docker-compose up
+- start db:
+docker-compose up -d tech_task_node_db
+- run migrations:(change variables in ${})
+npx sequelize-cli db:migrate --url 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}' --debug
+- start the app
+docker-compose up tech_task_backend
 
-- server should be running on port 3001
+- for stopping db service:
+docker-compose stop tech_task_node_db
 
 - check quick-doc.txt
