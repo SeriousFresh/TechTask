@@ -1,7 +1,7 @@
 const sequelize = require('sequelize');
 const moment = require('moment');
 const db = require('../models/db');
-const config = require('../../config.json');
+const config = require('../config.json');
 
 const { Op } = sequelize;
 const {

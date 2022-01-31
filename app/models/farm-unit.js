@@ -1,4 +1,4 @@
-const config = require('../../config.json');
+const config = require('../config.json');
 
 module.exports = (sequelize, Datatypes) => {
   const FarmUnit = sequelize.define('FarmUnit', {

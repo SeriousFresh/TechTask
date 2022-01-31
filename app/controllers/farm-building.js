@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const db = require('../models/db');
-const config = require('../../config.json');
+const config = require('../config.json');
 
 const {
   FarmBuilding,
