@@ -25,7 +25,7 @@ exports.getAll = async (req, res) => {
   try {
     const limit = req.query.rowsPerPage || 5;
     const offset = ((req.query.pageNumber || 1) - 1) * limit;
-    const orderField = req.query.orderField || 'createdAt';
+    const orderField = req.query.orderField || 'name';
     const sortType = req.query.sortType || 'asc';
     let farmBuildings = await FarmBuilding.findAll({
       include: [
